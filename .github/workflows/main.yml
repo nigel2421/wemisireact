@@ -36,6 +36,6 @@ jobs:
           # The local directory is where Vite outputs the finalized static files
           local-dir: ./dist/ 
           # The remote-dir is the root of the FTP account (public_html or a subdomain folder)
-          remote-dir: /
+          remote-dir: /public_html
           # Optional: Delete files on the server that are NOT in your local-dir
           args: --delete --skip-if-unchanged
