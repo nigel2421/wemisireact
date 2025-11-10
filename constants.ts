@@ -15,6 +15,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     description: 'Classic Italian polished marble, perfect for elegant floors and walls. A timeless choice for luxury interiors.',
     imageUrl: 'https://picsum.photos/seed/marble1/600/400',
     category: 'Marble',
+    price: 1170.00,
   },
   {
     id: 'prod-2',
@@ -22,6 +23,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     description: 'Sleek and durable slate panels for a contemporary garden or property boundary. Offers privacy and style.',
     imageUrl: 'https://picsum.photos/seed/fence1/600/400',
     category: 'Fences',
+    price: 20150.00,
   },
   {
     id: 'prod-3',
@@ -29,6 +31,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     description: 'Warm, rustic terracotta tiles in a modern hexagon shape. Ideal for kitchens and entryways.',
     imageUrl: 'https://picsum.photos/seed/tiles1/600/400',
     category: 'Tiles',
+    price: 845.00,
   },
   {
     id: 'prod-4',
@@ -36,6 +39,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     description: 'A rich, dark brown marble with intricate light veining. Makes a bold statement for countertops or feature walls.',
     imageUrl: 'https://picsum.photos/seed/marble2/600/400',
     category: 'Marble',
+    price: 12415.00,
   },
   {
     id: 'prod-5',
@@ -43,6 +47,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     description: 'Authentic, old-world cobblestone for creating charming driveways, walkways, and patios.',
     imageUrl: 'https://picsum.photos/seed/stone1/600/400',
     category: 'Stone',
+    price: 620.00,
   },
   {
     id: 'prod-6',
@@ -50,6 +55,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     description: 'Versatile and clean ceramic subway tiles. A classic choice for backsplashes in kitchens and bathrooms.',
     imageUrl: 'https://picsum.photos/seed/tiles2/600/400',
     category: 'Tiles',
+    price: 390.00,
   },
    {
     id: 'prod-7',
@@ -57,6 +63,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     description: 'Elegant and secure wrought iron fencing with ornate details. Perfect for classic and formal landscapes.',
     imageUrl: 'https://picsum.photos/seed/fence2/600/400',
     category: 'Fences',
+    price: 35750.00,
   },
   {
     id: 'prod-8',
@@ -64,5 +71,6 @@ export const INITIAL_PRODUCTS: Product[] = [
     description: 'Natural travertine stone with a unique textured finish. Brings a touch of earthy elegance to any space.',
     imageUrl: 'https://picsum.photos/seed/stone2/600/400',
     category: 'Stone',
+    price: 945.00,
   },
 ];

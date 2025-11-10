@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { SpinnerIcon } from './icons/SpinnerIcon';
 
 interface LoginProps {
   onLogin: (username: string, password: string) => void;
   error: string | null;
+  isLoading: boolean;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin, error }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, error, isLoading }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   
@@ -14,7 +16,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error }) => {
     onLogin(username, password);
   };
 
-  const inputClass = "w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500 transition-shadow";
+  const inputClass = "w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-stone-500 transition-shadow disabled:bg-stone-100";
   const labelClass = "block text-sm font-medium text-stone-700 mb-1";
 
   return (
@@ -26,37 +28,40 @@ const Login: React.FC<LoginProps> = ({ onLogin, error }) => {
                 <p className="font-medium">{error}</p>
             </div>
         )}
-        <div>
-          <label htmlFor="username" className={labelClass}>Username</label>
-          <input 
-            type="text" 
-            id="username"
-            value={username} 
-            onChange={(e) => setUsername(e.target.value)} 
-            className={inputClass}
-            placeholder="e.g., admin"
-            autoComplete="username"
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password" className={labelClass}>Password</label>
-          <input 
-            type="password"
-            id="password"
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)}
-            className={inputClass}
-            placeholder="••••••••••••"
-            autoComplete="current-password"
-            required
-          />
-        </div>
+        <fieldset disabled={isLoading} className="space-y-6">
+          <div>
+            <label htmlFor="username" className={labelClass}>Username</label>
+            <input 
+              type="text" 
+              id="username"
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)} 
+              className={inputClass}
+              placeholder="e.g., admin"
+              autoComplete="username"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className={labelClass}>Password</label>
+            <input 
+              type="password"
+              id="password"
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              className={inputClass}
+              placeholder="••••••••••••"
+              autoComplete="current-password"
+              required
+            />
+          </div>
+        </fieldset>
         <button 
           type="submit" 
-          className="w-full bg-stone-800 text-white py-3 px-4 rounded-md font-semibold hover:bg-stone-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-stone-600"
+          disabled={isLoading}
+          className="w-full bg-stone-800 text-white py-3 px-4 rounded-md font-semibold hover:bg-stone-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-stone-600 flex justify-center items-center disabled:bg-stone-500 disabled:cursor-wait"
         >
-          Login
+          {isLoading ? <SpinnerIcon /> : 'Login'}
         </button>
       </form>
     </div>

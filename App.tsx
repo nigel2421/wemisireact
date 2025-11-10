@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Product } from './types';
 import { INITIAL_PRODUCTS, ADMIN_CREDENTIALS } from './constants';
@@ -17,6 +16,7 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'products' | 'admin'>('products');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [productToVisualize, setProductToVisualize] = useState<Product | null>(null);
 
   // Load products from localStorage or use initial products
@@ -54,15 +54,21 @@ const App: React.FC = () => {
   };
   
   const handleLogin = (username: string, password: string) => {
-    const isAdmin = ADMIN_CREDENTIALS.some(
-      cred => cred.username === username && cred.password === password
-    );
-    if (isAdmin) {
-      setIsAuthenticated(true);
-      setAuthError(null);
-    } else {
-      setAuthError('Invalid username or password.');
-    }
+    setIsAuthLoading(true);
+    setAuthError(null);
+
+    // Simulate network request
+    setTimeout(() => {
+      const isAdmin = ADMIN_CREDENTIALS.some(
+        cred => cred.username === username && cred.password === password
+      );
+      if (isAdmin) {
+        setIsAuthenticated(true);
+      } else {
+        setAuthError('Invalid username or password.');
+      }
+      setIsAuthLoading(false);
+    }, 1000);
   };
 
   const handleLogout = () => {
@@ -94,7 +100,7 @@ const App: React.FC = () => {
           />
         )}
         {currentView === 'admin' && !isAuthenticated && (
-            <Login onLogin={handleLogin} error={authError} />
+            <Login onLogin={handleLogin} error={authError} isLoading={isAuthLoading} />
         )}
         {currentView === 'admin' && isAuthenticated && (
            <AdminPanel 

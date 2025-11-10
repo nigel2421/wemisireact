@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Product, ProductCategory } from '../types';
 import ProductForm from './ProductForm';
@@ -16,6 +15,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleAddProduct = () => {
     setEditingProduct(null);
@@ -33,22 +34,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
 
   const confirmDelete = () => {
     if (productToDelete) {
-      setProducts(products.filter(p => p.id !== productToDelete.id));
-      setProductToDelete(null);
+      setIsDeleting(true);
+      // Simulate API call
+      setTimeout(() => {
+        setProducts(products.filter(p => p.id !== productToDelete.id));
+        setProductToDelete(null);
+        setIsDeleting(false);
+      }, 1000);
     }
   };
 
   const handleSaveProduct = (product: Product) => {
-    if (editingProduct) {
-      // Edit
-      setProducts(products.map(p => p.id === product.id ? product : p));
-    } else {
-      // Add
-      const newProduct = { ...product, id: `prod-${Date.now()}` };
-      setProducts([...products, newProduct]);
-    }
-    setIsFormOpen(false);
-    setEditingProduct(null);
+    setIsSaving(true);
+    // Simulate API call
+    setTimeout(() => {
+      if (editingProduct) {
+        // Edit
+        setProducts(products.map(p => p.id === product.id ? product : p));
+      } else {
+        // Add
+        const newProduct = { ...product, id: `prod-${Date.now()}` };
+        setProducts([...products, newProduct]);
+      }
+      setIsFormOpen(false);
+      setEditingProduct(null);
+      setIsSaving(false);
+    }, 1500);
   };
   
   const productCategories: ProductCategory[] = ['Tiles', 'Marble', 'Fences', 'Stone'];
@@ -75,6 +86,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
             setEditingProduct(null);
           }}
           categories={productCategories}
+          isSaving={isSaving}
         />
       )}
       
@@ -86,6 +98,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
                 <tr>
                   <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-stone-900 sm:pl-0">Name</th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-stone-900">Category</th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-stone-900">Price</th>
                   <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-0">
                     <span className="sr-only">Actions</span>
                   </th>
@@ -96,6 +109,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
                   <tr key={product.id}>
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-stone-900 sm:pl-0">{product.name}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-stone-500">{product.category}</td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-stone-500">Ksh {product.price.toFixed(2)}</td>
                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                       <button onClick={() => handleEditProduct(product)} className="text-stone-600 hover:text-stone-900 mr-4">
                         <EditIcon />
@@ -120,6 +134,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
           onConfirm={confirmDelete}
           title="Delete Product"
           message={`Are you sure you want to delete "${productToDelete.name}"? This action cannot be undone.`}
+          isConfirming={isDeleting}
         />
       )}
     </div>

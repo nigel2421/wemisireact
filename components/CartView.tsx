@@ -1,9 +1,9 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Product } from '../types';
 import { WHATSAPP_NUMBER } from '../constants';
 import { TrashIcon } from './icons/TrashIcon';
 import { WhatsAppIcon } from './icons/WhatsAppIcon';
+import { SpinnerIcon } from './icons/SpinnerIcon';
 
 interface CartViewProps {
   isOpen: boolean;
@@ -13,14 +13,24 @@ interface CartViewProps {
 }
 
 const CartView: React.FC<CartViewProps> = ({ isOpen, onClose, cartItems, onRemoveFromCart }) => {
+  const [isSending, setIsSending] = useState(false);
+
   if (!isOpen) return null;
 
+  const cartTotal = cartItems.reduce((total, item) => total + item.price, 0);
+
   const handleWhatsAppInquiry = () => {
-    const productNames = cartItems.map(item => item.name).join(',\n- ');
-    const message = `Hello! I'm interested in the following products:\n\n- ${productNames}\n\nPlease provide me with more information. Thank you.`;
+    setIsSending(true);
+    const productList = cartItems.map(item => `- ${item.name} (Ksh ${item.price.toFixed(2)})`).join('\n');
+    const message = `Hello! I'm interested in the following products:\n\n${productList}\n\nTotal: Ksh ${cartTotal.toFixed(2)}\n\nPlease provide me with more information. Thank you.`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
+    
+    setTimeout(() => {
+      window.open(whatsappUrl, '_blank');
+      setIsSending(false);
+      onClose();
+    }, 1000);
   };
 
   return (
@@ -49,7 +59,7 @@ const CartView: React.FC<CartViewProps> = ({ isOpen, onClose, cartItems, onRemov
                   <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-md object-cover" />
                   <div className="flex-grow">
                     <p className="font-semibold text-stone-800">{item.name}</p>
-                    <p className="text-sm text-stone-500">{item.category}</p>
+                    <p className="text-sm text-stone-500">Ksh {item.price.toFixed(2)}</p>
                   </div>
                   <button 
                     onClick={() => onRemoveFromCart(item.id)}
@@ -66,12 +76,26 @@ const CartView: React.FC<CartViewProps> = ({ isOpen, onClose, cartItems, onRemov
 
         {cartItems.length > 0 && (
           <div className="p-4 border-t bg-stone-50">
+             <div className="flex justify-between items-center mb-4 text-lg">
+                <span className="font-semibold text-stone-700">Total</span>
+                <span className="font-bold text-stone-900">Ksh {cartTotal.toFixed(2)}</span>
+            </div>
             <button 
               onClick={handleWhatsAppInquiry}
-              className="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-bold flex items-center justify-center hover:bg-emerald-600 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+              disabled={isSending}
+              className="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-bold flex items-center justify-center hover:bg-emerald-600 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:bg-emerald-400 disabled:cursor-wait"
             >
-              <WhatsAppIcon />
-              <span className="ml-2">Send Inquiry on WhatsApp</span>
+              {isSending ? (
+                <>
+                  <SpinnerIcon />
+                  <span className="ml-2">Redirecting...</span>
+                </>
+              ) : (
+                <>
+                  <WhatsAppIcon />
+                  <span className="ml-2">Send Inquiry on WhatsApp</span>
+                </>
+              )}
             </button>
              <p className="text-xs text-stone-500 mt-2 text-center">You will be redirected to WhatsApp to send your message.</p>
           </div>

@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { SpinnerIcon } from './icons/SpinnerIcon';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -7,6 +7,7 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
   title: string;
   message: string;
+  isConfirming: boolean;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -15,11 +16,12 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   message,
+  isConfirming,
 }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4" onClick={!isConfirming ? onClose : undefined}>
       <div 
         className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6"
         onClick={e => e.stopPropagation()}
@@ -29,15 +31,17 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <div className="mt-6 flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-md font-semibold text-sm bg-stone-200 text-stone-800 hover:bg-stone-300 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-stone-400"
+            disabled={isConfirming}
+            className="px-4 py-2 rounded-md font-semibold text-sm bg-stone-200 text-stone-800 hover:bg-stone-300 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-stone-400 disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 rounded-md font-semibold text-sm bg-red-600 text-white hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            disabled={isConfirming}
+            className="px-4 py-2 rounded-md font-semibold text-sm bg-red-600 text-white hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center justify-center w-24 disabled:bg-red-400 disabled:cursor-wait"
           >
-            Delete
+            {isConfirming ? <SpinnerIcon /> : 'Delete'}
           </button>
         </div>
       </div>
