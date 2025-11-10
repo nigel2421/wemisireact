@@ -1,6 +1,6 @@
 import { Product } from './types';
 
-export const WHATSAPP_NUMBER = '15551234567'; // IMPORTANT: Replace with a real WhatsApp number (including country code without +)
+export const WHATSAPP_NUMBER = '254721202052'; // IMPORTANT: Replace with a real WhatsApp number (including country code without +)
 
 // Updated to support multiple admin users
 export const ADMIN_CREDENTIALS = [
