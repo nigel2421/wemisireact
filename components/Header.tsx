@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CartIcon } from './icons/CartIcon';
 
@@ -7,15 +6,19 @@ interface HeaderProps {
   onCartClick: () => void;
   onNavigate: (view: 'products' | 'admin') => void;
   currentView: 'products' | 'admin';
+  isAuthenticated: boolean;
+  onLogout: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ cartItemCount, onCartClick, onNavigate, currentView }) => {
+const Header: React.FC<HeaderProps> = ({ cartItemCount, onCartClick, onNavigate, currentView, isAuthenticated, onLogout }) => {
   const linkClasses = (view: 'products' | 'admin') => 
     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
       currentView === view 
         ? 'bg-stone-800 text-white' 
         : 'text-stone-600 hover:bg-stone-200 hover:text-stone-900'
     }`;
+    
+  const logoutButtonClass = 'px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:bg-stone-200 hover:text-stone-900';
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
@@ -28,9 +31,15 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onCartClick, onNavigate,
             <button onClick={() => onNavigate('products')} className={linkClasses('products')}>
               Products
             </button>
-            <button onClick={() => onNavigate('admin')} className={linkClasses('admin')}>
-              Admin Panel
-            </button>
+            {isAuthenticated ? (
+               <button onClick={onLogout} className={logoutButtonClass}>
+                Logout
+              </button>
+            ) : (
+              <button onClick={() => onNavigate('admin')} className={linkClasses('admin')}>
+                Admin Panel
+              </button>
+            )}
           </nav>
           <div className="flex items-center">
             <button 
@@ -52,9 +61,15 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onCartClick, onNavigate,
                 <button onClick={() => onNavigate('products')} className={linkClasses('products')}>
                 Products
                 </button>
-                <button onClick={() => onNavigate('admin')} className={linkClasses('admin')}>
-                Admin
-                </button>
+                {isAuthenticated ? (
+                  <button onClick={onLogout} className="px-3 py-2 rounded-md text-sm font-medium text-stone-600">
+                    Logout
+                  </button>
+                ) : (
+                  <button onClick={() => onNavigate('admin')} className={linkClasses('admin')}>
+                    Admin
+                  </button>
+                )}
             </div>
           </div>
       </div>

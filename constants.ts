@@ -1,7 +1,12 @@
-
 import { Product } from './types';
 
 export const WHATSAPP_NUMBER = '15551234567'; // IMPORTANT: Replace with a real WhatsApp number (including country code without +)
+
+// Updated to support multiple admin users
+export const ADMIN_CREDENTIALS = [
+  { username: 'superadmin', password: 'supersecretpassword!@#' },
+  { username: 'admin', password: 'babatibim1' }
+];
 
 export const INITIAL_PRODUCTS: Product[] = [
   {

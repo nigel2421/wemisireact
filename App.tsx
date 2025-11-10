@@ -1,70 +1,110 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from './types';
-import { INITIAL_PRODUCTS } from './constants';
+import { INITIAL_PRODUCTS, ADMIN_CREDENTIALS } from './constants';
 import Header from './components/Header';
 import ProductList from './components/ProductList';
-import AdminPanel from './components/AdminPanel';
 import CartView from './components/CartView';
 import Footer from './components/Footer';
-
-type View = 'products' | 'admin';
+import AdminPanel from './components/AdminPanel';
+import Login from './components/Login';
 
 const App: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
-  const [cart, setCart] = useState<Product[]>([]);
-  const [currentView, setCurrentView] = useState<View>('products');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState<Product[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'products' | 'admin'>('products');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
-  const addProduct = (product: Omit<Product, 'id'>) => {
-    const newProduct: Product = {
-      ...product,
-      id: `prod-${Date.now()}-${Math.random()}`,
-    };
-    setProducts(prevProducts => [newProduct, ...prevProducts]);
-    setCurrentView('products'); // Switch back to product view after adding
-  };
-
-  const addToCart = (productToAdd: Product) => {
-    setCart(prevCart => {
-      if (prevCart.find(p => p.id === productToAdd.id)) {
-        return prevCart; // Prevent duplicates
+  // Load products from localStorage or use initial products
+  useEffect(() => {
+    try {
+      const storedProducts = localStorage.getItem('products');
+      if (storedProducts) {
+        setProducts(JSON.parse(storedProducts));
+      } else {
+        setProducts(INITIAL_PRODUCTS);
+        localStorage.setItem('products', JSON.stringify(INITIAL_PRODUCTS));
       }
-      return [...prevCart, productToAdd];
-    });
+    } catch (error) {
+      console.error("Failed to load products from localStorage", error);
+      setProducts(INITIAL_PRODUCTS);
+    }
+  }, []);
+  
+  // Persist products to localStorage whenever they change
+  const persistProducts = (updatedProducts: Product[]) => {
+      setProducts(updatedProducts);
+      localStorage.setItem('products', JSON.stringify(updatedProducts));
   };
 
-  const removeFromCart = (productId: string) => {
-    setCart(prevCart => prevCart.filter(p => p.id !== productId));
+  const handleAddToCart = (product: Product) => {
+    setCartItems(prevItems => [...prevItems, product]);
+  };
+
+  const handleRemoveFromCart = (productId: string) => {
+    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
   };
 
   const isProductInCart = (productId: string) => {
-    return cart.some(p => p.id === productId);
+    return cartItems.some(item => item.id === productId);
+  };
+  
+  const handleLogin = (username: string, password: string) => {
+    const isAdmin = ADMIN_CREDENTIALS.some(
+      cred => cred.username === username && cred.password === password
+    );
+    if (isAdmin) {
+      setIsAuthenticated(true);
+      setAuthError(null);
+    } else {
+      setAuthError('Invalid username or password.');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentView('products');
+  };
+  
+  const handleNavigate = (view: 'products' | 'admin') => {
+    setCurrentView(view);
   };
 
   return (
-    <div className="min-h-screen bg-stone-100 text-stone-800 flex flex-col">
+    <div className="bg-stone-100 min-h-screen flex flex-col font-sans">
       <Header
-        cartItemCount={cart.length}
+        cartItemCount={cartItems.length}
         onCartClick={() => setIsCartOpen(true)}
-        onNavigate={setCurrentView}
+        onNavigate={handleNavigate}
         currentView={currentView}
+        isAuthenticated={isAuthenticated}
+        onLogout={handleLogout}
       />
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {currentView === 'products' && (
-          <ProductList 
-            products={products} 
-            onAddToCart={addToCart} 
+          <ProductList
+            products={products}
+            onAddToCart={handleAddToCart}
             isProductInCart={isProductInCart}
           />
         )}
-        {currentView === 'admin' && <AdminPanel onAddProduct={addProduct} />}
+        {currentView === 'admin' && !isAuthenticated && (
+            <Login onLogin={handleLogin} error={authError} />
+        )}
+        {currentView === 'admin' && isAuthenticated && (
+           <AdminPanel 
+             products={products}
+             setProducts={persistProducts}
+           />
+        )}
       </main>
-      <CartView 
+      <CartView
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
-        cartItems={cart}
-        onRemoveFromCart={removeFromCart}
+        cartItems={cartItems}
+        onRemoveFromCart={handleRemoveFromCart}
       />
       <Footer />
     </div>
