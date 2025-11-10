@@ -25,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({ cartItemCount, onCartClick, onNavigate,
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-stone-800 tracking-tight">Wemisi</h1>
+            <h1 className="text-2xl font-bold text-stone-800 tracking-tight">Interior Lux</h1>
           </div>
           <nav className="hidden md:flex items-center space-x-4">
             <button onClick={() => onNavigate('products')} className={linkClasses('products')}>
