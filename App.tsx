@@ -8,6 +8,7 @@ import CartView from './components/CartView';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
 import Login from './components/Login';
+import RoomVisualizer from './components/RoomVisualizer';
 
 const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -16,6 +17,7 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'products' | 'admin'>('products');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [productToVisualize, setProductToVisualize] = useState<Product | null>(null);
 
   // Load products from localStorage or use initial products
   useEffect(() => {
@@ -88,6 +90,7 @@ const App: React.FC = () => {
             products={products}
             onAddToCart={handleAddToCart}
             isProductInCart={isProductInCart}
+            onVisualizeClick={(product) => setProductToVisualize(product)}
           />
         )}
         {currentView === 'admin' && !isAuthenticated && (
@@ -106,6 +109,12 @@ const App: React.FC = () => {
         cartItems={cartItems}
         onRemoveFromCart={handleRemoveFromCart}
       />
+      {productToVisualize && (
+        <RoomVisualizer 
+          product={productToVisualize} 
+          onClose={() => setProductToVisualize(null)}
+        />
+      )}
       <Footer />
     </div>
   );
