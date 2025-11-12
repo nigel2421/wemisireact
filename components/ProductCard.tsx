@@ -90,7 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, isInCar
              ) : (
                <>
                  <PlusIcon />
-                 <span className="ml-2">Add to Inquiry</span>
+                 <span className="ml-2">Add to Cart</span>
                </>
              )}
            </button>

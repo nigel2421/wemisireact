@@ -14,7 +14,7 @@ interface AdminPanelProps {
 
 // Define the categories outside the component or use useMemo if they were derived from state/props
 // Placing them here is fine since they are constant
-const productCategories: ProductCategory[] = ['Tiles', 'Marble', 'Fences', 'Stone'];
+const productCategories: ProductCategory[] = ['Tiles', 'Marble', 'Fences', 'Stone', 'Floor', 'Granite', 'Roof', 'Mirrors', 'Styling & Decorations', 'Bathroom Fixtures', 'Kitchen Fixtures', 'Professional Services', 'Tools & Hardware'];
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
