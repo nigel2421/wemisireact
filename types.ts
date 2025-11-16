@@ -1,11 +1,11 @@
 
-export type ProductCategory = 'Tiles' | 'Marble' | 'Fences' | 'Stone';
+export type ProductCategory = string;
 
 export interface Product {
   id: string;
   name: string;
   description: string;
-  imageUrl: string;
+  imageUrls: string[];
   category: ProductCategory;
   price: number;
 }

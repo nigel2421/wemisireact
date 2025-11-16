@@ -46,7 +46,7 @@ const RoomVisualizer: React.FC<RoomVisualizerProps> = ({ product, onClose }) => 
       const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
       
       const roomImageBase64 = roomImage.split(',')[1];
-      const productImageBase64 = await imageUrlToBase64(product.imageUrl);
+      const productImageBase64 = await imageUrlToBase64(product.imageUrls[0]);
 
       const roomImagePart = { inlineData: { mimeType: 'image/jpeg', data: roomImageBase64 } };
       const productImagePart = { inlineData: { mimeType: 'image/jpeg', data: productImageBase64 } };
@@ -105,7 +105,7 @@ const RoomVisualizer: React.FC<RoomVisualizerProps> = ({ product, onClose }) => 
           {/* Left Panel: Product & Controls */}
           <aside className="w-full md:w-1/3 p-4 border-b md:border-b-0 md:border-r flex flex-col gap-4">
             <div className="text-center">
-              <img src={product.imageUrl} alt={product.name} className="w-full h-40 object-cover rounded-md mx-auto"/>
+              <img src={product.imageUrls[0]} alt={product.name} className="w-full h-40 object-cover rounded-md mx-auto"/>
               <h3 className="font-bold mt-2">{product.name}</h3>
               <p className="text-sm text-stone-500">{product.category}</p>
             </div>

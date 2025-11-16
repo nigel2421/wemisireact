@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Product, ProductCategory } from '../types';
 import { SpinnerIcon } from './icons/SpinnerIcon';
+import { XIcon } from './icons/XIcon';
 
 interface ProductFormProps {
   product: Product | null;
@@ -14,7 +15,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel, ca
   const [formData, setFormData] = useState<Omit<Product, 'id'>>({
     name: '',
     description: '',
-    imageUrl: '',
+    imageUrls: [],
     category: 'Tiles',
     price: 0,
   });
@@ -26,7 +27,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel, ca
       setFormData({
         name: '',
         description: '',
-        imageUrl: '',
+        imageUrls: [],
         category: 'Tiles',
         price: 0,
       });
@@ -42,20 +43,36 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel, ca
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, imageUrl: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files) {
+      const filePromises = Array.from(files).map(file => {
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                resolve(reader.result as string);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(filePromises).then(base64Strings => {
+        setFormData(prev => ({ ...prev, imageUrls: [...prev.imageUrls, ...base64Strings] }));
+      });
     }
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setFormData(prev => ({
+        ...prev,
+        imageUrls: prev.imageUrls.filter((_, index) => index !== indexToRemove)
+    }));
   };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.imageUrl) {
-        alert("Please upload an image for the product.");
+    if (formData.imageUrls.length === 0) {
+        alert("Please upload at least one image for the product.");
         return;
     }
     onSave({ ...formData, id: product?.id || '' });
@@ -116,24 +133,31 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel, ca
           </div>
 
           <div>
-            <label className={labelClass}>Product Image</label>
-            <div className="mt-1 flex items-center gap-4 p-4 border border-dashed border-stone-300 rounded-md">
-              <div className="w-24 h-24 rounded-md bg-stone-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {formData.imageUrl ? (
-                      <img src={formData.imageUrl} alt="Product preview" className="w-full h-full object-cover" />
-                  ) : (
-                      <span className="text-xs text-stone-500 text-center p-2">Image Preview</span>
-                  )}
-              </div>
-              <div className="w-full">
-                  <label htmlFor="imageUpload" className="relative cursor-pointer bg-white rounded-md font-medium text-stone-600 hover:text-stone-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-stone-500 disabled:cursor-not-allowed">
-                      <span>{formData.imageUrl ? 'Change image' : 'Upload an image'}</span>
-                      <input id="imageUpload" name="imageUpload" type="file" className="sr-only" accept="image/png, image/jpeg, image/webp" onChange={handleImageChange} />
-                  </label>
-                  <p className="text-xs text-stone-500 mt-1">PNG, JPG, WEBP up to 2MB.</p>
-              </div>
+            <label className={labelClass}>Product Images</label>
+            <div className="mt-1 p-4 border border-dashed border-stone-300 rounded-md">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 mb-4">
+                    {formData.imageUrls.map((url, index) => (
+                        <div key={index} className="relative group aspect-square">
+                            <img src={url} alt={`Product preview ${index + 1}`} className="w-full h-full object-cover rounded-md" />
+                            <button 
+                                type="button" 
+                                onClick={() => handleRemoveImage(index)}
+                                className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500"
+                                aria-label="Remove image"
+                            >
+                                <XIcon className="h-3 w-3" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+                <label htmlFor="imageUpload" className="relative cursor-pointer bg-white rounded-md font-medium text-stone-600 hover:text-stone-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-stone-500 disabled:cursor-not-allowed">
+                    <span>{formData.imageUrls.length > 0 ? 'Add more images' : 'Upload images'}</span>
+                    <input id="imageUpload" name="imageUpload" type="file" className="sr-only" accept="image/png, image/jpeg, image/webp" onChange={handleImageChange} multiple />
+                </label>
+                <p className="text-xs text-stone-500 mt-1">You can upload multiple images. The first image will be the main one.</p>
             </div>
           </div>
+
 
           <div>
             <label htmlFor="category" className={labelClass}>Category</label>
