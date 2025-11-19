@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Product, ProductCategory } from '../types';
 import { SpinnerIcon } from './icons/SpinnerIcon';
@@ -18,6 +19,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel, ca
     imageUrls: [],
     category: 'Tiles',
     price: 0,
+    isNewArrival: false,
+    isInStock: true,
+    reviews: [],
   });
   
   useEffect(() => {
@@ -30,16 +34,25 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel, ca
         imageUrls: [],
         category: 'Tiles',
         price: 0,
+        isNewArrival: false,
+        isInStock: true,
+        reviews: [],
       });
     }
   }, [product]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({ 
-      ...prev, 
-      [name]: type === 'number' ? parseFloat(value) || 0 : value 
-    }));
+    
+    if (type === 'checkbox') {
+        const checked = (e.target as HTMLInputElement).checked;
+        setFormData(prev => ({ ...prev, [name]: checked }));
+    } else {
+        setFormData(prev => ({ 
+            ...prev, 
+            [name]: type === 'number' ? parseFloat(value) || 0 : value 
+        }));
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +65,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel, ca
                 resolve(reader.result as string);
             };
             reader.onerror = reject;
-            reader.readAsDataURL(file);
+            // Explicitly cast file to Blob to satisfy TypeScript if inference fails (e.g. unknown)
+            reader.readAsDataURL(file as Blob);
         });
       });
 
@@ -75,6 +89,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel, ca
         alert("Please upload at least one image for the product.");
         return;
     }
+    // Reviews are implicitly preserved because they are part of formData
     onSave({ ...formData, id: product?.id || '' });
   };
 
@@ -86,6 +101,35 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel, ca
       <h3 className="text-xl font-bold text-stone-800 mb-4">{product ? 'Edit Product' : 'Add New Product'}</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <fieldset disabled={isSaving} className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 flex items-center gap-3 p-3 bg-white rounded-md border border-stone-200">
+                <input
+                type="checkbox"
+                id="isNewArrival"
+                name="isNewArrival"
+                checked={formData.isNewArrival || false}
+                onChange={handleChange}
+                className="h-5 w-5 text-stone-800 border-stone-300 rounded focus:ring-stone-500 cursor-pointer"
+                />
+                <label htmlFor="isNewArrival" className="text-sm font-medium text-stone-700 cursor-pointer select-none">
+                Mark as "New Arrival"
+                </label>
+            </div>
+            <div className="flex-1 flex items-center gap-3 p-3 bg-white rounded-md border border-stone-200">
+                <input
+                type="checkbox"
+                id="isInStock"
+                name="isInStock"
+                checked={formData.isInStock}
+                onChange={handleChange}
+                className="h-5 w-5 text-stone-800 border-stone-300 rounded focus:ring-stone-500 cursor-pointer"
+                />
+                <label htmlFor="isInStock" className="text-sm font-medium text-stone-700 cursor-pointer select-none">
+                Product is In Stock
+                </label>
+            </div>
+          </div>
+
           <div>
             <label htmlFor="name" className={labelClass}>Product Name</label>
             <input

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Product } from '../types';
 import { TrashIcon } from './icons/TrashIcon';
@@ -51,11 +52,21 @@ const WishlistView: React.FC<WishlistViewProps> = ({
           <div className="flex-grow overflow-y-auto p-4">
             <ul className="space-y-4">
               {wishlistItems.map(item => (
-                <li key={item.id} className="flex items-center space-x-4 p-2 rounded-lg hover:bg-stone-50 transition-colors">
-                  <img src={item.imageUrls[0]} alt={item.name} className="w-16 h-16 rounded-md object-cover flex-shrink-0" />
+                <li key={item.id} className={`flex items-center space-x-4 p-2 rounded-lg transition-colors ${item.isInStock ? 'hover:bg-stone-50' : 'bg-stone-50 opacity-80'}`}>
+                  <div className="relative">
+                    <img src={item.imageUrls[0]} alt={item.name} className={`w-16 h-16 rounded-md object-cover flex-shrink-0 ${!item.isInStock ? 'grayscale' : ''}`} />
+                    {!item.isInStock && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                             <span className="text-[10px] font-bold bg-stone-800 text-white px-1 rounded shadow-sm">SOLD OUT</span>
+                        </div>
+                    )}
+                  </div>
                   <div className="flex-grow">
                     <p className="font-semibold text-stone-800">{item.name}</p>
                     <p className="text-sm text-stone-500">Ksh {item.price.toFixed(2)}</p>
+                    {!item.isInStock && (
+                        <p className="text-xs text-red-600 font-bold mt-1">Currently unavailable</p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <button 
@@ -65,19 +76,29 @@ const WishlistView: React.FC<WishlistViewProps> = ({
                     >
                       <TrashIcon />
                     </button>
-                    <button 
-                      onClick={() => onMoveToCart(item)}
-                      disabled={isProductInCart(item.id)}
-                      className={`py-1 px-3 rounded-full text-sm font-semibold flex items-center gap-1 transition-colors ${
-                        isProductInCart(item.id) 
-                        ? 'bg-emerald-100 text-emerald-700 cursor-default'
-                        : 'bg-stone-200 text-stone-700 hover:bg-stone-300'
-                      }`}
-                      aria-label={`Move ${item.name} to inquiry cart`}
-                    >
-                      {isProductInCart(item.id) ? <CheckIcon/> : <PlusIcon />}
-                      {isProductInCart(item.id) ? 'In Cart' : 'Add'}
-                    </button>
+                    
+                    {item.isInStock ? (
+                        <button 
+                        onClick={() => onMoveToCart(item)}
+                        disabled={isProductInCart(item.id)}
+                        className={`py-1 px-3 rounded-full text-sm font-semibold flex items-center gap-1 transition-colors ${
+                            isProductInCart(item.id) 
+                            ? 'bg-emerald-100 text-emerald-700 cursor-default'
+                            : 'bg-stone-200 text-stone-700 hover:bg-stone-300'
+                        }`}
+                        aria-label={`Move ${item.name} to inquiry cart`}
+                        >
+                        {isProductInCart(item.id) ? <CheckIcon/> : <PlusIcon />}
+                        {isProductInCart(item.id) ? 'In Cart' : 'Add'}
+                        </button>
+                    ) : (
+                        <button
+                         disabled
+                         className="py-1 px-2 rounded-md text-xs font-bold bg-stone-200 text-stone-400 cursor-not-allowed"
+                        >
+                            Out of Stock
+                        </button>
+                    )}
                   </div>
                 </li>
               ))}

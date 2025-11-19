@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { CartIcon } from './icons/CartIcon';
 import { HeartIcon } from './icons/HeartIcon';
@@ -17,7 +18,6 @@ interface HeaderProps {
   onNavigate: (view: View) => void;
   currentView: View;
   isAuthenticated: boolean;
-  onLogout: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   categories: ProductCategory[];
@@ -33,7 +33,6 @@ const Header: React.FC<HeaderProps> = ({
   onNavigate, 
   currentView, 
   isAuthenticated, 
-  onLogout,
   searchQuery,
   onSearchChange,
   categories,
@@ -79,8 +78,6 @@ const Header: React.FC<HeaderProps> = ({
         ? 'bg-stone-800 text-white' 
         : 'text-stone-600 hover:bg-stone-200 hover:text-stone-900'
     }`;
-    
-  const authButtonClass = 'px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:bg-stone-200 hover:text-stone-900';
 
   const handleCategoryClick = (category: ProductCategory | 'All') => {
     onSelectCategory(category);
@@ -146,11 +143,6 @@ const Header: React.FC<HeaderProps> = ({
                 {link.label}
               </button>
             ))}
-            {isAuthenticated && (
-              <button onClick={onLogout} className={mobileLinkClasses()}>
-                Logout
-              </button>
-            )}
         </div>
       </div>
     </div>
@@ -203,11 +195,6 @@ const Header: React.FC<HeaderProps> = ({
                     {link.label}
                   </button>
                 ))}
-                {isAuthenticated && (
-                   <button onClick={onLogout} className={authButtonClass}>
-                    Logout
-                  </button>
-                )}
               </nav>
 
               {/* Icons and Mobile Menu Trigger */}

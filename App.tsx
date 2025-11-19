@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Product, ProductCategory } from './types';
+import { Product, ProductCategory, Review } from './types';
 import { ADMIN_CREDENTIALS } from './constants';
 import { getProducts, saveProducts, getCategories, saveCategories } from './lib/api';
 import Header from './components/Header';
@@ -15,6 +16,7 @@ import ProductDetailModal from './components/ProductDetailModal';
 import AboutPage from './components/AboutPage';
 import BlogPage from './components/BlogPage';
 import CareersPage from './components/CareersPage';
+import Notification from './components/Notification';
 
 type View = 'products' | 'admin' | 'about' | 'blog' | 'careers';
 
@@ -34,6 +36,7 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory | 'All'>('All');
+  const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
 
   // Load initial data from our simulated API
   useEffect(() => {
@@ -48,6 +51,7 @@ const App: React.FC = () => {
         setCategories(fetchedCategories);
       } catch (error) {
         console.error("Failed to load initial data", error);
+        setNotification({ type: 'error', message: 'Failed to load application data. Please check your internet connection.' });
       } finally {
         setIsLoading(false);
       }
@@ -60,8 +64,18 @@ const App: React.FC = () => {
       try {
         await saveProducts(updatedProducts);
         setProducts(updatedProducts);
+        
+        // Update items in cart to reflect new product state (e.g. price changes, out of stock)
+        setCartItems(prevCart => prevCart.map(cartItem => {
+            const updatedItem = updatedProducts.find(p => p.id === cartItem.id);
+            return updatedItem ? updatedItem : cartItem;
+        }));
+
+        setNotification({ type: 'success', message: 'Products updated successfully.' });
       } catch (error) {
           console.error("Failed to save products", error);
+          setNotification({ type: 'error', message: 'Failed to save changes. Please try again.' });
+          throw error; // Re-throw to allow caller to handle failure (e.g. stop loading spinner)
       }
   };
 
@@ -69,12 +83,19 @@ const App: React.FC = () => {
       try {
         await saveCategories(updatedCategories);
         setCategories(updatedCategories);
+        setNotification({ type: 'success', message: 'Categories updated successfully.' });
       } catch (error) {
           console.error("Failed to save categories", error);
+          setNotification({ type: 'error', message: 'Failed to save categories. Please try again.' });
+          throw error;
       }
   };
 
   const handleAddToCart = (product: Product) => {
+    if (!product.isInStock) {
+      setNotification({ type: 'error', message: 'This item is currently out of stock.' });
+      return;
+    }
     setCartItems(prevItems => [...prevItems, product]);
   };
 
@@ -102,7 +123,9 @@ const App: React.FC = () => {
     if (!isProductInCart(product.id)) {
       handleAddToCart(product);
     }
-    handleRemoveFromWishlist(product.id);
+    if (product.isInStock) {
+        handleRemoveFromWishlist(product.id);
+    }
   };
 
   const isProductInWishlist = (productId: string) => {
@@ -118,6 +141,7 @@ const App: React.FC = () => {
       );
       if (isAdmin) {
         setIsAuthenticated(true);
+        setCurrentView('products'); // Switch to products view upon login so they can see the site
       } else {
         setAuthError('Invalid username or password.');
       }
@@ -127,7 +151,7 @@ const App: React.FC = () => {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setCurrentView('products');
+    // Stay on current view, just remove admin privileges
   };
   
   const handleNavigate = (view: View) => {
@@ -149,6 +173,37 @@ const App: React.FC = () => {
     setProductToVisualize(product);
   }
 
+  const handleAddReview = async (productId: string, review: Omit<Review, 'id' | 'date'>) => {
+    const newReview: Review = {
+      ...review,
+      id: `rev-${Date.now()}`,
+      date: new Date().toISOString().split('T')[0] // YYYY-MM-DD
+    };
+
+    const updatedProducts = products.map(p => {
+      if (p.id === productId) {
+        const updatedProduct = {
+          ...p,
+          reviews: [...(p.reviews || []), newReview]
+        };
+        if (selectedProduct && selectedProduct.id === productId) {
+          setSelectedProduct(updatedProduct);
+        }
+        return updatedProduct;
+      }
+      return p;
+    });
+
+    try {
+        await saveProducts(updatedProducts);
+        setProducts(updatedProducts);
+        setNotification({ type: 'success', message: 'Review added successfully.' });
+    } catch (error) {
+        console.error("Failed to save review", error);
+        setNotification({ type: 'error', message: 'Failed to submit review. Please try again.' });
+    }
+  };
+
   const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -157,55 +212,68 @@ const App: React.FC = () => {
   });
 
   return (
-    <div className="bg-stone-100 min-h-screen flex flex-col font-sans">
-      <Header
-        cartItemCount={cartItems.length}
-        wishlistItemCount={wishlist.length}
-        onCartClick={() => setIsCartOpen(true)}
-        onWishlistClick={() => setIsWishlistOpen(true)}
-        onNavigate={handleNavigate}
-        currentView={currentView}
-        isAuthenticated={isAuthenticated}
-        onLogout={handleLogout}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelectCategory={handleSelectCategory}
-      />
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <SpinnerIcon className="h-12 w-12 text-stone-500" />
-          </div>
-        ) : currentView === 'products' ? (
-          <ProductList
-            products={filteredProducts}
-            onAddToCart={handleAddToCart}
-            isProductInCart={isProductInCart}
-            onToggleWishlist={handleToggleWishlist}
-            isProductInWishlist={isProductInWishlist}
-            onVisualizeClick={handleVisualizeClick}
-            onProductClick={(product) => setSelectedProduct(product)}
-            selectedCategory={selectedCategory}
-          />
-        ) : currentView === 'about' ? (
-          <AboutPage />
-        ) : currentView === 'blog' ? (
-          <BlogPage />
-        ) : currentView === 'careers' ? (
-          <CareersPage />
-        ) : currentView === 'admin' && !isAuthenticated ? (
-            <Login onLogin={handleLogin} error={authError} isLoading={isAuthLoading} />
-        ) : currentView === 'admin' && isAuthenticated ? (
+    <div className="flex h-screen bg-stone-100 font-sans overflow-hidden">
+      
+      {/* Admin Sidebar - Only visible when authenticated */}
+      {isAuthenticated && (
+        <div className="w-80 sm:w-96 flex-shrink-0 h-full border-r border-stone-200 bg-white z-30 relative shadow-xl transition-all duration-300">
            <AdminPanel 
              products={products}
              setProducts={persistProducts}
              categories={categories}
              setCategories={persistCategories}
+             onLogout={handleLogout}
            />
-        ) : null}
-      </main>
+        </div>
+      )}
+
+      {/* Main Content Area - Scrollable */}
+      <div className="flex-1 flex flex-col h-full overflow-y-auto relative scroll-smooth">
+        <Header
+            cartItemCount={cartItems.length}
+            wishlistItemCount={wishlist.length}
+            onCartClick={() => setIsCartOpen(true)}
+            onWishlistClick={() => setIsWishlistOpen(true)}
+            onNavigate={handleNavigate}
+            currentView={currentView}
+            isAuthenticated={isAuthenticated}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleSelectCategory}
+        />
+        
+        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+                <SpinnerIcon className="h-12 w-12 text-stone-500" />
+            </div>
+            ) : currentView === 'products' ? (
+            <ProductList
+                products={filteredProducts}
+                onAddToCart={handleAddToCart}
+                isProductInCart={isProductInCart}
+                onToggleWishlist={handleToggleWishlist}
+                isProductInWishlist={isProductInWishlist}
+                onVisualizeClick={handleVisualizeClick}
+                onProductClick={(product) => setSelectedProduct(product)}
+                selectedCategory={selectedCategory}
+            />
+            ) : currentView === 'about' ? (
+            <AboutPage />
+            ) : currentView === 'blog' ? (
+            <BlogPage products={products} onProductClick={setSelectedProduct} />
+            ) : currentView === 'careers' ? (
+            <CareersPage />
+            ) : currentView === 'admin' && !isAuthenticated ? (
+                <Login onLogin={handleLogin} error={authError} isLoading={isAuthLoading} />
+            ) : null}
+        </main>
+
+        <Footer onNavigate={handleNavigate} isAuthenticated={isAuthenticated} />
+      </div>
+
       <CartView
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -235,9 +303,17 @@ const App: React.FC = () => {
           onToggleWishlist={handleToggleWishlist}
           isProductInWishlist={isProductInWishlist(selectedProduct.id)}
           onVisualizeClick={handleVisualizeClick}
+          onAddReview={handleAddReview}
         />
       )}
-      <Footer onNavigate={handleNavigate} isAuthenticated={isAuthenticated} />
+      
+      {notification && (
+        <Notification 
+          type={notification.type} 
+          message={notification.message} 
+          onClose={() => setNotification(null)} 
+        />
+      )}
     </div>
   );
 };

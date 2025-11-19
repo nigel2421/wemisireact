@@ -1,3 +1,4 @@
+
 import { Product } from './types';
 
 export const WHATSAPP_NUMBER = '15551234567'; // IMPORTANT: Replace with a real WhatsApp number (including country code without +)
@@ -16,6 +17,24 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageUrls: ['https://picsum.photos/seed/marble1/600/400'],
     category: 'Marble',
     price: 1170.00,
+    isNewArrival: true,
+    isInStock: true,
+    reviews: [
+      {
+        id: 'r1',
+        userName: 'Alice M.',
+        rating: 5,
+        comment: 'Absolutely stunning tiles! They transformed my bathroom completely.',
+        date: '2023-10-05'
+      },
+      {
+        id: 'r2',
+        userName: 'John D.',
+        rating: 4,
+        comment: 'Great quality, but shipping took a bit longer than expected.',
+        date: '2023-09-20'
+      }
+    ]
   },
   {
     id: 'prod-2',
@@ -24,6 +43,17 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageUrls: ['https://picsum.photos/seed/fence1/600/400'],
     category: 'Fences',
     price: 20150.00,
+    isNewArrival: true,
+    isInStock: true,
+    reviews: [
+       {
+        id: 'r3',
+        userName: 'Sarah K.',
+        rating: 5,
+        comment: 'Very solid and looks expensive. My neighbors are jealous!',
+        date: '2023-11-01'
+      }
+    ]
   },
   {
     id: 'prod-3',
@@ -32,6 +62,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageUrls: ['https://picsum.photos/seed/tiles1/600/400'],
     category: 'Tiles',
     price: 845.00,
+    isInStock: false,
+    reviews: []
   },
   {
     id: 'prod-4',
@@ -40,6 +72,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageUrls: ['https://picsum.photos/seed/marble2/600/400'],
     category: 'Marble',
     price: 12415.00,
+    isInStock: true,
+    reviews: []
   },
   {
     id: 'prod-5',
@@ -48,6 +82,16 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageUrls: ['https://picsum.photos/seed/stone1/600/400'],
     category: 'Stone',
     price: 620.00,
+    isInStock: true,
+    reviews: [
+      {
+        id: 'r4',
+        userName: 'Mike R.',
+        rating: 5,
+        comment: 'Perfect for my garden path.',
+        date: '2023-08-15'
+      }
+    ]
   },
   {
     id: 'prod-6',
@@ -56,6 +100,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageUrls: ['https://picsum.photos/seed/tiles2/600/400'],
     category: 'Tiles',
     price: 390.00,
+    isInStock: true,
+    reviews: []
   },
    {
     id: 'prod-7',
@@ -64,6 +110,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageUrls: ['https://picsum.photos/seed/fence2/600/400'],
     category: 'Fences',
     price: 35750.00,
+    isNewArrival: true,
+    isInStock: true,
+    reviews: []
   },
   {
     id: 'prod-8',
@@ -72,5 +121,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageUrls: ['https://picsum.photos/seed/stone2/600/400'],
     category: 'Stone',
     price: 945.00,
+    isInStock: true,
+    reviews: []
   },
 ];

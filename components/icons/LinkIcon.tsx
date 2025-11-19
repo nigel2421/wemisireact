@@ -1,6 +1,7 @@
+
 import React from 'react';
 
-export const CartIcon: React.FC<{ className?: string }> = ({ className = "h-6 w-6" }) => (
+export const LinkIcon: React.FC<{ className?: string }> = ({ className = "h-5 w-5" }) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
     className={className} 
@@ -12,7 +13,7 @@ export const CartIcon: React.FC<{ className?: string }> = ({ className = "h-6 w-
     <path 
       strokeLinecap="round" 
       strokeLinejoin="round" 
-      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" 
+      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" 
     />
   </svg>
 );
