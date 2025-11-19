@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { SpinnerIcon } from './icons/SpinnerIcon';
 
@@ -21,14 +22,20 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, isLoading }) => {
 
   return (
     <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg mt-10">
-      <h2 className="text-2xl font-bold text-stone-800 mb-6 text-center">Admin Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <h2 className="text-2xl font-bold text-stone-800 mb-2 text-center">
+          Admin Login
+      </h2>
+      <p className="text-center text-stone-500 mb-6 text-sm">
+          Access the store management panel
+      </p>
+      
+      <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-            <div className="p-3 text-center bg-red-100 border-l-4 border-red-500 text-red-700" role="alert">
+            <div className="p-3 text-center bg-red-100 border-l-4 border-red-500 text-red-700 rounded-r" role="alert">
                 <p className="font-medium">{error}</p>
             </div>
         )}
-        <fieldset disabled={isLoading} className="space-y-6">
+        <fieldset disabled={isLoading} className="space-y-5">
           <div>
             <label htmlFor="username" className={labelClass}>Username</label>
             <input 
@@ -56,6 +63,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, isLoading }) => {
             />
           </div>
         </fieldset>
+        
         <button 
           type="submit" 
           disabled={isLoading}

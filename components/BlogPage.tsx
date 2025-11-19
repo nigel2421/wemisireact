@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BlogPost, Product } from '../types';
 import BlogCard from './BlogCard';
 import { ChevronLeftIcon } from './icons/ChevronLeftIcon';
@@ -231,6 +230,37 @@ interface BlogPageProps {
 const BlogPage: React.FC<BlogPageProps> = ({ products, onProductClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+
+  // SEO Management
+  useEffect(() => {
+    const updateMeta = (title: string, desc: string) => {
+      document.title = title;
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (!metaDescription) {
+        metaDescription = document.createElement('meta');
+        metaDescription.setAttribute('name', 'description');
+        document.head.appendChild(metaDescription);
+      }
+      metaDescription.setAttribute('content', desc);
+    };
+
+    if (selectedPost) {
+      updateMeta(`${selectedPost.title} | WEMISI Blog`, selectedPost.excerpt);
+    } else {
+      updateMeta('WEMISI Blog - Construction & DIY Guides', 'Expert advice on construction, DIY home improvement, and material selection for your home projects.');
+    }
+  }, [selectedPost]);
+
+  // Reset SEO on unmount
+  useEffect(() => {
+    return () => {
+      document.title = 'WEMISI';
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute('content', 'An elegant web application to showcase interior design products like tiles, marble, and fences.');
+      }
+    };
+  }, []);
 
   const totalPages = Math.ceil(BLOG_POSTS.length / ITEMS_PER_PAGE);
   

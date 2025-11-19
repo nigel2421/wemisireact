@@ -23,6 +23,7 @@ interface HeaderProps {
   categories: ProductCategory[];
   selectedCategory: string;
   onSelectCategory: (category: ProductCategory | 'All') => void;
+  onAdminMenuClick?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -38,6 +39,7 @@ const Header: React.FC<HeaderProps> = ({
   categories,
   selectedCategory,
   onSelectCategory,
+  onAdminMenuClick,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -153,7 +155,17 @@ const Header: React.FC<HeaderProps> = ({
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex-shrink-0 flex items-center">
+            <div className="flex-shrink-0 flex items-center gap-3">
+               {/* Admin Hamburger Menu - Left side, only for admins on mobile */}
+               {isAuthenticated && (
+                 <button 
+                   onClick={onAdminMenuClick}
+                   className="lg:hidden p-2 -ml-2 rounded-md text-stone-600 hover:bg-stone-200 hover:text-stone-900 focus:outline-none"
+                   aria-label="Open Admin Panel"
+                 >
+                   <MenuIcon />
+                 </button>
+               )}
                <button onClick={() => onNavigate('products')} className="text-2xl font-bold text-stone-800 tracking-tight">WEMISI</button>
             </div>
 

@@ -137,8 +137,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, isInCar
           {/* Ratings Display */}
           <div className="flex items-center gap-1 mt-1 mb-2">
             <StarRating rating={averageRating} sizeClass="h-4 w-4" />
-            <span className="text-xs text-stone-500 ml-1">
-              ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+            <span className="text-xs text-stone-500 ml-1 flex items-center gap-1">
+              {averageRating > 0 && <span className="font-bold text-stone-700">{averageRating.toFixed(1)}</span>}
+              <span>({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</span>
             </span>
           </div>
 
