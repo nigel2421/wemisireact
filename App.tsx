@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Product, ProductCategory, Review } from './types';
-import { ADMIN_CREDENTIALS } from './constants';
-import { getProducts, saveProducts, getCategories, saveCategories } from './lib/api';
+import { getProducts, saveProducts, getCategories, saveCategories, login } from './lib/api';
 import Header from './components/Header';
 import ProductList from './components/ProductList';
 import CartView from './components/CartView';
@@ -25,15 +24,26 @@ type View = 'products' | 'admin' | 'about' | 'blog' | 'careers';
 const App: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
-  const [cartItems, setCartItems] = useState<Product[]>([]);
-  const [wishlist, setWishlist] = useState<string[]>([]); // Store product IDs
+  
+  // --- State Persistence ---
+  // Load cart, wishlist, and auth status from localStorage on initial load.
+  const [cartItems, setCartItems] = useState<Product[]>(() => {
+    const savedCart = localStorage.getItem('cartItems');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
+  const [wishlist, setWishlist] = useState<string[]>(() => {
+    const savedWishlist = localStorage.getItem('wishlist');
+    return savedWishlist ? JSON.parse(savedWishlist) : [];
+  });
+  // --- End State Persistence ---
+
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [currentView, setCurrentView] = useState<View>('products');
   
   // Auth State
-  const [adminUsers, setAdminUsers] = useState(ADMIN_CREDENTIALS);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('authToken'));
   const [authError, setAuthError] = useState<string | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   
@@ -71,6 +81,16 @@ const App: React.FC = () => {
     
     fetchInitialData();
   }, []);
+
+  // --- State Persistence Effects ---
+  // Save cart and wishlist to localStorage whenever they change.
+  useEffect(() => {
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  useEffect(() => {
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
   
   const persistProducts = async (updatedProducts: Product[]) => {
       try {
@@ -144,25 +164,22 @@ const App: React.FC = () => {
     return wishlist.includes(productId);
   };
 
-  const handleLogin = (username: string, password: string) => {
+  const handleLogin = async (username: string, password: string) => {
     setIsAuthLoading(true);
     setAuthError(null);
-    setTimeout(() => {
-      const isAdmin = adminUsers.some(
-        cred => cred.username === username && cred.password === password
-      );
-      if (isAdmin) {
-        setIsAuthenticated(true);
-        // Default to Admin View, Website is hidden by default until opened
-        setIsWebsiteOpen(false);
-      } else {
-        setAuthError('Invalid username or password.');
-      }
+    try {
+      await login(username, password);
+      setIsAuthenticated(true);
+      setIsWebsiteOpen(false); // Default to Admin View
+    } catch (error: any) {
+      setAuthError(error.message || 'An unknown error occurred.');
+    } finally {
       setIsAuthLoading(false);
-    }, 1000);
+    }
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('authToken');
     setIsAuthenticated(false);
     setIsWebsiteOpen(false);
     setCurrentView('products');

@@ -25,7 +25,9 @@ const ProductList: React.FC<ProductListProps> = ({
   onProductClick,
   selectedCategory,
 }) => {
-  if (products.length === 0) {
+  const visibleProducts = products.filter(p => p.isVisible !== false);
+
+  if (visibleProducts.length === 0) {
     return (
       <div className="text-center py-16 text-stone-500">
         <SearchIcon className="mx-auto h-12 w-12" />
@@ -42,11 +44,11 @@ const ProductList: React.FC<ProductListProps> = ({
               {selectedCategory === 'All' ? 'All Products' : selectedCategory}
           </h1>
           <p className="mt-1 text-sm text-stone-500">
-              Showing {products.length} {products.length === 1 ? 'product' : 'products'}.
+              Showing {visibleProducts.length} {visibleProducts.length === 1 ? 'product' : 'products'}.
           </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {products.map(product => (
+        {visibleProducts.map(product => (
           <ProductCard 
             key={product.id} 
             product={product} 

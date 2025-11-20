@@ -1,43 +1,117 @@
 import { Product, ProductCategory } from '../types';
-import { INITIAL_PRODUCTS } from '../constants';
 
-// --- MOCK DATABASE ---
-// In a real-world application, this would be a database (e.g., PostgreSQL, MongoDB) 
-// accessed via a backend API. We are using a simple in-memory store here to simulate 
-// this behavior and remove the dependency on client-side localStorage.
+const API_BASE_URL = 'http://localhost:3001/api';
 
-// This makes data consistent within a single user's session. To make data persistent 
-// and shared across ALL users on the internet, this mock API must be replaced with 
-// actual HTTP requests to a backend service.
+// Helper for fetch calls to include credentials
+const fetchWithCredentials = async (url: string, options: RequestInit = {}) => {
+    const defaultOptions: RequestInit = {
+        credentials: 'include', // This is crucial for sending session cookies
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        },
+    };
+    return fetch(url, { ...defaultOptions, ...options });
+};
 
-let products: Product[] = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
-let categories: ProductCategory[] = ['Tiles', 'Marble', 'Fences', 'Stone'];
-
-
-const simulateDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // --- Product API ---
 
 export const getProducts = async (): Promise<Product[]> => {
-  await simulateDelay(500); // Simulate network latency for fetching data
-  return Promise.resolve(products);
+  const response = await fetchWithCredentials(`${API_BASE_URL}/products`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch products');
+  }
+  const data = await response.json();
+  return data.data;
 };
 
 export const saveProducts = async (updatedProducts: Product[]): Promise<void> => {
-  await simulateDelay(500); // Simulate network latency for saving data
-  products = updatedProducts;
-  return Promise.resolve();
+  const response = await fetchWithCredentials(`${API_BASE_URL}/products`, {
+    method: 'PUT',
+    body: JSON.stringify(updatedProducts),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to save products');
+  }
 };
 
 // --- Category API ---
 
 export const getCategories = async (): Promise<ProductCategory[]> => {
-    await simulateDelay(300); // Simulate network latency
-    return Promise.resolve(categories);
+  const response = await fetchWithCredentials(`${API_BASE_URL}/categories`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch categories');
+  }
+  const data = await response.json();
+  return data.data;
 };
 
+// Note: saveCategories is not implemented on the backend as categories are derived from products.
 export const saveCategories = async (updatedCategories: ProductCategory[]): Promise<void> => {
-    await simulateDelay(300); // Simulate network latency
-    categories = updatedCategories;
+    console.warn("saveCategories is not implemented in production API.");
     return Promise.resolve();
+};
+
+// --- Auth API ---
+
+export const login = async (username: string, password: string): Promise<void> => {
+    const response = await fetchWithCredentials(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        body: JSON.stringify({ username, password }),
+    });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Login failed');
+    }
+};
+
+export const logout = async (): Promise<void> => {
+    const response = await fetchWithCredentials(`${API_BASE_URL}/logout`, {
+        method: 'POST',
+    });
+    if (!response.ok) {
+        throw new Error('Logout failed');
+    }
+};
+
+export const getAuthStatus = async (): Promise<{ isAuthenticated: boolean }> => {
+    const response = await fetchWithCredentials(`${API_BASE_URL}/auth/status`);
+    if (!response.ok) {
+        throw new Error('Failed to get auth status');
+    }
+    return response.json();
+};
+
+
+// --- Session Data API ---
+
+export const getCart = async (): Promise<Product[]> => {
+    const response = await fetchWithCredentials(`${API_BASE_URL}/session/cart`);
+    if (!response.ok) {
+        throw new Error('Failed to get cart');
+    }
+    return response.json();
+};
+
+export const saveCart = async (cart: Product[]): Promise<void> => {
+    await fetchWithCredentials(`${API_BASE_URL}/session/cart`, {
+        method: 'POST',
+        body: JSON.stringify({ cart }),
+    });
+};
+
+export const getWishlist = async (): Promise<string[]> => {
+    const response = await fetchWithCredentials(`${API_BASE_URL}/session/wishlist`);
+    if (!response.ok) {
+        throw new Error('Failed to get wishlist');
+    }
+    return response.json();
+};
+
+export const saveWishlist = async (wishlist: string[]): Promise<void> => {
+    await fetchWithCredentials(`${API_BASE_URL}/session/wishlist`, {
+        method: 'POST',
+        body: JSON.stringify({ wishlist }),
+    });
 };

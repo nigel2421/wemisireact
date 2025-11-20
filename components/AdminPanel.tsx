@@ -10,6 +10,7 @@ import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
 import { EyeIcon } from './icons/EyeIcon';
+import { EyeOffIcon } from './icons/EyeOffIcon';
 
 interface AdminPanelProps {
   products: Product[];
@@ -72,7 +73,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, categori
         if (editingProduct) {
         updatedProducts = products.map(p => (p.id === product.id ? product : p));
         } else {
-        const newProduct = { ...product, id: `prod-${Date.now()}` };
+        const newProduct = { ...product, id: `prod-${Date.now()}`, isVisible: true };
         updatedProducts = [...products, newProduct];
         }
         
@@ -84,6 +85,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, categori
     } finally {
         setIsSaving(false);
     }
+  };
+
+  const handleToggleVisibility = async (productId: string) => {
+    const updatedProducts = products.map(p => 
+        p.id === productId ? { ...p, isVisible: !p.isVisible } : p
+    );
+    // We can call setProducts directly to save this change
+    await setProducts(updatedProducts);
   };
   
   // --- Category Management Handlers ---
@@ -257,7 +266,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, categori
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {products.map(product => (
-                        <div key={product.id} className="bg-stone-800 p-4 rounded-xl border border-stone-700 flex gap-4 items-center group hover:border-stone-500 hover:bg-stone-800/80 transition-all">
+                        <div key={product.id} className={`bg-stone-800 p-4 rounded-xl border border-stone-700 flex gap-4 items-center group hover:border-stone-500 hover:bg-stone-800/80 transition-all ${!product.isVisible && 'opacity-60'}`}>
                             <div className="h-20 w-20 rounded-lg bg-stone-700 flex-shrink-0 overflow-hidden border border-stone-600">
                                 <img src={product.imageUrls[0]} alt="" className="h-full w-full object-cover" />
                             </div>
@@ -273,13 +282,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ products, setProducts, categori
                                     ) : (
                                         <span className="text-red-500 flex items-center gap-1 text-xs"><span className="w-2 h-2 rounded-full bg-red-500"></span> Out of Stock</span>
                                     )}
+                                     {!product.isVisible && (
+                                        <span className="text-amber-500 flex items-center gap-1 text-xs"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Hidden</span>
+                                    )}
                                 </div>
                                 <div className="flex gap-4 mt-3">
                                     <button 
                                         onClick={() => handleEditProduct(product)} 
                                         className="text-sm text-stone-400 hover:text-white flex items-center gap-1 hover:underline transition-colors"
                                     >
-                                        <EditIcon className="h-4 w-4" /> Edit Details
+                                        <EditIcon className="h-4 w-4" /> Edit
+                                    </button>
+                                     <button 
+                                        onClick={() => handleToggleVisibility(product.id)} 
+                                        className="text-sm text-stone-400 hover:text-white flex items-center gap-1 hover:underline transition-colors"
+                                    >
+                                        {product.isVisible ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                                        {product.isVisible ? 'Hide' : 'Show'}
                                     </button>
                                     <button 
                                         onClick={() => handleDeleteProduct(product)} 

@@ -19,6 +19,7 @@ export interface Product {
   isNewArrival?: boolean;
   isInStock: boolean;
   reviews?: Review[];
+  isVisible?: boolean;
 }
 
 export interface BlogPost {
