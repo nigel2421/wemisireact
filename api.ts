@@ -1,43 +1,51 @@
 import { Product, ProductCategory } from '../types';
-import { ADMIN_CREDENTIALS, INITIAL_PRODUCTS } from '../constants';
 
-const API_BASE_URL = 'http://localhost:3001/api';
+// Use Vite env var (set VITE_API_BASE_URL) for production, fallback to local dev server
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:3001/api';
 
-/**
- * A helper function to add the auth token to requests.
- * It retrieves the token from localStorage and adds it to the Authorization header.
- */
+const getAuthToken = () => localStorage.getItem('authToken') ?? undefined;
+export const setAuthToken = (token: string | null) => {
+  if (token) localStorage.setItem('authToken', token);
+  else localStorage.removeItem('authToken');
+};
+export const logout = (redirect = '/') => {
+  localStorage.removeItem('authToken');
+  // redirect to login/home — consumer can override redirect
+  if (typeof window !== 'undefined') window.location.href = redirect;
+};
+
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem('authToken');
-  console.log("Token retrieved from localStorage:", token); // Debugging line
-
-
+  const token = getAuthToken();
   const headers = {
     ...options.headers,
     'Content-Type': 'application/json',
   };
+  if (token) (headers as any)['Authorization'] = `Bearer ${token}`;
 
-  // Add the Authorization header if a token exists
-  if (token) {
-    console.log("Adding Authorization header with token:", token); // Debugging line
-    (headers as any)['Authorization'] = `Bearer ${token}`;
+  let response: Response;
+  try {
+    response = await fetch(url, { ...options, headers });
+  } catch (err) {
+    // Network-level error
+    throw new Error((err as Error).message || 'Network error');
   }
-
-  const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
-    // If the error is 401 or 403, it's an auth issue, so we can log the user out.
     if (response.status === 401 || response.status === 403) {
-        console.error('Authentication error. Logging out.');
-        localStorage.removeItem('authToken');
-        // Optionally, redirect to login page
-        window.location.href = '/'; 
+      // auth error -> clear token and redirect to login
+      logout('/');
     }
     const errorData = await response.json().catch(() => ({ message: response.statusText }));
-    throw new Error(errorData.message || `Request failed with status ${response.status}`);
+    throw new Error(errorData?.message || `Request failed with status ${response.status}`);
   }
 
-  return response.json();
+  // Attempt to parse JSON, but return text if not JSON
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 };
 
 
@@ -80,7 +88,7 @@ export const login = async (username: string, password: string): Promise<void> =
 
   const { token } = await response.json();
   if (token) {
-    localStorage.setItem('authToken', token);
+    setAuthToken(token);
   } else {
     throw new Error('Login successful, but no token was received.');
   }
